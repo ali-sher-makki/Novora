@@ -1,0 +1,74 @@
+{% extends 'store/base.html' %}
+{% block title %}Create Account — NOVORA{% endblock %}
+{% block content %}
+<div class="auth-page" style="padding:2rem 0;">
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-6">
+        <div class="auth-card">
+          <div class="text-center mb-4">
+            <a href="{% url 'home' %}" style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--primary); letter-spacing:4px; text-decoration:none;">
+              NOV<span style="color:var(--accent-dark);">O</span>RA
+            </a>
+          </div>
+          <h2 class="auth-title">Join NOVORA</h2>
+          <p class="auth-subtitle">Create your account and start shopping</p>
+          <form method="POST" class="novora-form">
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">First Name</label>
+                <input type="text" name="first_name" class="form-control" placeholder="First name" value="{{ form.first_name.value|default:'' }}" required>
+                {% for e in form.first_name.errors %}<div style="font-size:0.78rem;color:#e74c3c;">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Last Name</label>
+                <input type="text" name="last_name" class="form-control" placeholder="Last name" value="{{ form.last_name.value|default:'' }}" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Username</label>
+                <div style="position:relative;">
+                  <i class="bi bi-person" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                  <input type="text" name="username" class="form-control" style="padding-left:2.5rem;" placeholder="Choose a username" value="{{ form.username.value|default:'' }}" required>
+                </div>
+                {% for e in form.username.errors %}<div style="font-size:0.78rem;color:#e74c3c;">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-12">
+                <label class="form-label">Email Address</label>
+                <div style="position:relative;">
+                  <i class="bi bi-envelope" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                  <input type="email" name="email" class="form-control" style="padding-left:2.5rem;" placeholder="your@email.com" value="{{ form.email.value|default:'' }}" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Password</label>
+                <div style="position:relative;">
+                  <i class="bi bi-lock" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                  <input type="password" name="password1" class="form-control" style="padding-left:2.5rem;" placeholder="Create password" required>
+                </div>
+                {% for e in form.password1.errors %}<div style="font-size:0.78rem;color:#e74c3c;">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Confirm Password</label>
+                <div style="position:relative;">
+                  <i class="bi bi-lock-fill" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                  <input type="password" name="password2" class="form-control" style="padding-left:2.5rem;" placeholder="Repeat password" required>
+                </div>
+                {% for e in form.password2.errors %}<div style="font-size:0.78rem;color:#e74c3c;">{{ e }}</div>{% endfor %}
+              </div>
+            </div>
+            <button type="submit" class="btn-novora-accent w-100 justify-content-center mt-4" style="display:flex; padding:0.85rem;">
+              <i class="bi bi-person-check me-2"></i>Create My Account
+            </button>
+          </form>
+          <div class="auth-divider">or</div>
+          <p class="text-center" style="font-size:0.88rem; color:var(--gray); margin:0;">
+            Already have an account?
+            <a href="{% url 'login' %}" style="color:var(--accent-dark); font-weight:600;">Sign in here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

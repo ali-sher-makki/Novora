@@ -1,0 +1,70 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}My Wishlist — NOVORA{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <h1 class="page-header-title"><i class="bi bi-heart me-3"></i>My Wishlist</h1>
+    <p style="color:rgba(255,255,255,0.6); margin:0; font-size:0.9rem;">
+      <a href="{% url 'home' %}" style="color:var(--accent);">Home</a> &rsaquo; Wishlist
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if wishlist.products.all %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin:0;">
+      {{ wishlist.products.count }} Saved Item{{ wishlist.products.count|pluralize }}
+    </h5>
+    <a href="{% url 'product_list' %}" style="font-size:0.85rem; color:var(--accent-dark);">
+      <i class="bi bi-plus me-1"></i>Add More
+    </a>
+  </div>
+  <div class="row g-4">
+    {% for product in wishlist.products.all %}
+    <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="product-card h-100">
+        <div class="product-card-img-wrap">
+          {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}">
+          {% else %}
+          <div class="product-card-placeholder">
+            <i class="bi bi-bag fs-2 mb-2"></i>
+            <span style="font-size:0.75rem;">No Image</span>
+          </div>
+          {% endif %}
+          <span class="product-card-badge badge-{{ product.category.category_type }}">{{ product.category.name }}</span>
+          <a href="{% url 'product_detail' product.slug %}" class="product-card-overlay-btn">Quick View</a>
+        </div>
+        <div class="product-card-body">
+          <h6 class="product-card-name">{{ product.name }}</h6>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="product-card-price">PKR {{ product.price }}</span>
+            <span class="product-card-rating"><i class="bi bi-star-fill"></i> {{ product.average_rating }}</span>
+          </div>
+          <a href="{% url 'product_detail' product.slug %}" class="btn-novora w-100 justify-content-center mb-2" style="display:flex; padding:0.55rem;">
+            <i class="bi bi-bag-plus me-2"></i>View & Add to Cart
+          </a>
+          <a href="{% url 'toggle_wishlist' product.id %}" class="btn-novora-outline w-100 justify-content-center" style="display:flex; padding:0.45rem; font-size:0.75rem; color:#e74c3c; border-color:#e74c3c;">
+            <i class="bi bi-heart-break me-2"></i>Remove
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-heart"></i></div>
+    <h4>Your Wishlist is Empty</h4>
+    <p>Save your favourite items here so you never lose track of them.</p>
+    <a href="{% url 'product_list' %}" class="btn-novora-accent mt-3">
+      <i class="bi bi-heart me-2"></i>Explore Products
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

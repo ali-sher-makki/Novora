@@ -1,0 +1,218 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} — NOVORA{% endblock %}
+{% block content %}
+
+<!-- BREADCRUMB -->
+<div style="background:var(--light); padding:0.8rem 0; border-bottom:1px solid var(--border);">
+  <div class="container">
+    <span style="font-size:0.82rem; color:var(--gray);">
+      <a href="{% url 'home' %}" style="color:var(--accent-dark);">Home</a> &rsaquo;
+      <a href="{% url 'product_list' %}" style="color:var(--accent-dark);">Products</a> &rsaquo;
+      <strong style="color:var(--primary);">{{ product.name }}</strong>
+    </span>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-5">
+
+    <!-- LEFT: IMAGES -->
+    <div class="col-md-5">
+      <div class="product-detail-img mb-3">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" id="mainImg">
+        {% else %}
+        <div style="height:480px; background:var(--light); display:flex; align-items:center; justify-content:center; border-radius:var(--radius-lg);">
+          <i class="bi bi-bag fs-1" style="color:#ccc;"></i>
+        </div>
+        {% endif %}
+      </div>
+      <!-- Thumbnails -->
+      <div class="d-flex gap-2 flex-wrap">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" class="thumbnail-img active" onclick="document.getElementById('mainImg').src=this.src; document.querySelectorAll('.thumbnail-img').forEach(t=>t.classList.remove('active')); this.classList.add('active');">
+        {% endif %}
+        {% if product.image2 %}
+        <img src="{{ product.image2.url }}" class="thumbnail-img" onclick="document.getElementById('mainImg').src=this.src; document.querySelectorAll('.thumbnail-img').forEach(t=>t.classList.remove('active')); this.classList.add('active');">
+        {% endif %}
+        {% if product.image3 %}
+        <img src="{{ product.image3.url }}" class="thumbnail-img" onclick="document.getElementById('mainImg').src=this.src; document.querySelectorAll('.thumbnail-img').forEach(t=>t.classList.remove('active')); this.classList.add('active');">
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- RIGHT: DETAILS -->
+    <div class="col-md-7">
+      <span class="product-card-badge badge-{{ product.category.category_type }} mb-3" style="position:static; font-size:0.75rem;">
+        {{ product.category.name }}
+      </span>
+      <h1 class="product-detail-name mb-2">{{ product.name }}</h1>
+
+      <!-- Rating Row -->
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="d-flex align-items-center gap-1">
+          {% for i in "12345" %}
+          <i class="bi bi-star{% if forloop.counter <= product.average_rating %}-fill{% endif %}" style="color:#f4c542; font-size:0.9rem;"></i>
+          {% endfor %}
+          <span style="font-size:0.85rem; color:var(--gray); margin-left:4px;">({{ product.reviews.count }} reviews)</span>
+        </div>
+        {% if product.stock_quantity > 0 %}
+        <span class="status-badge status-delivered"><i class="bi bi-check-circle me-1"></i>In Stock ({{ product.stock_quantity }})</span>
+        {% else %}
+        <span class="status-badge status-cancelled"><i class="bi bi-x-circle me-1"></i>Out of Stock</span>
+        {% endif %}
+      </div>
+
+      <div class="product-detail-price mb-4">PKR {{ product.price }}</div>
+
+      <p style="color:var(--gray); font-size:0.92rem; line-height:1.8; margin-bottom:1.5rem;">{{ product.description }}</p>
+
+      <!-- Details -->
+      <div class="row g-2 mb-4">
+        {% if product.fabric %}
+        <div class="col-6">
+          <div style="background:var(--light); border-radius:var(--radius); padding:0.8rem 1rem;">
+            <span style="font-size:0.7rem; font-weight:700; color:var(--gray); letter-spacing:1px; text-transform:uppercase; display:block;">Fabric</span>
+            <span style="font-size:0.9rem; font-weight:600; color:var(--primary);">{{ product.fabric }}</span>
+          </div>
+        </div>
+        {% endif %}
+        {% if product.color %}
+        <div class="col-6">
+          <div style="background:var(--light); border-radius:var(--radius); padding:0.8rem 1rem;">
+            <span style="font-size:0.7rem; font-weight:700; color:var(--gray); letter-spacing:1px; text-transform:uppercase; display:block;">Color</span>
+            <span style="font-size:0.9rem; font-weight:600; color:var(--primary);">{{ product.color }}</span>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if product.stock_quantity > 0 %}
+      <form method="POST" action="{% url 'add_to_cart' product.id %}">
+        {% csrf_token %}
+        <!-- Size Selector -->
+        <div class="mb-4">
+          <span style="font-size:0.75rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--gray); display:block; margin-bottom:0.8rem;">Select Size</span>
+          <div class="d-flex gap-2 flex-wrap">
+            {% for size in product.get_sizes %}
+            <input type="radio" class="btn-check" name="size" id="size_{{ size }}" value="{{ size }}" {% if forloop.first %}checked{% endif %}>
+            <label class="size-btn" for="size_{{ size }}">{{ size }}</label>
+            {% endfor %}
+          </div>
+        </div>
+        <!-- Action Buttons -->
+        <div class="d-flex gap-3 flex-wrap">
+          <button type="submit" class="btn-hero-primary" style="font-size:0.85rem; padding:0.85rem 2rem;">
+            <i class="bi bi-bag-plus"></i> Add to Cart
+          </button>
+          {% if user.is_authenticated %}
+          <a href="{% url 'toggle_wishlist' product.id %}" class="btn-novora-outline">
+            <i class="bi bi-heart"></i> Wishlist
+          </a>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn-novora-outline">
+            <i class="bi bi-heart"></i> Wishlist
+          </a>
+          {% endif %}
+        </div>
+      </form>
+      {% else %}
+      <div style="background:#fff3f3; border:1px solid #ffcccc; border-radius:var(--radius); padding:1rem 1.5rem; color:#c0392b; font-weight:600;">
+        <i class="bi bi-x-circle me-2"></i>This product is currently out of stock.
+      </div>
+      {% endif %}
+
+      <!-- Trust Badges -->
+      <div class="d-flex gap-4 mt-4 pt-4" style="border-top:1px solid var(--border);">
+        <div class="text-center">
+          <i class="bi bi-truck" style="font-size:1.3rem; color:var(--accent-dark); display:block;"></i>
+          <span style="font-size:0.7rem; color:var(--gray);">Fast Delivery</span>
+        </div>
+        <div class="text-center">
+          <i class="bi bi-shield-check" style="font-size:1.3rem; color:var(--accent-dark); display:block;"></i>
+          <span style="font-size:0.7rem; color:var(--gray);">Authentic</span>
+        </div>
+        <div class="text-center">
+          <i class="bi bi-cash-coin" style="font-size:1.3rem; color:var(--accent-dark); display:block;"></i>
+          <span style="font-size:0.7rem; color:var(--gray);">COD Available</span>
+        </div>
+        <div class="text-center">
+          <i class="bi bi-arrow-counterclockwise" style="font-size:1.3rem; color:var(--accent-dark); display:block;"></i>
+          <span style="font-size:0.7rem; color:var(--gray);">Easy Returns</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="row mt-5 pt-4" style="border-top:2px solid var(--border);">
+    <div class="col-lg-8">
+      <h3 style="font-family:'Playfair Display',serif; color:var(--primary); margin-bottom:1.5rem;">
+        Customer Reviews
+        <span style="font-size:1rem; font-weight:400; color:var(--gray); font-family:'Poppins',sans-serif;">({{ product.reviews.count }})</span>
+      </h3>
+
+      {% if reviews %}
+        {% for review in reviews %}
+        <div class="review-card">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="d-flex align-items-center gap-3">
+              <div style="width:40px; height:40px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:0.9rem;">
+                {{ review.user.username|first|upper }}
+              </div>
+              <div>
+                <strong style="color:var(--primary); font-size:0.9rem;">{{ review.user.get_full_name|default:review.user.username }}</strong>
+                <span style="display:block; font-size:0.75rem; color:var(--gray);">{{ review.created_at|date:"d M Y" }}</span>
+              </div>
+            </div>
+            <div class="review-stars">
+              {% for i in "12345" %}
+              <i class="bi bi-star{% if forloop.counter <= review.rating %}-fill{% endif %}"></i>
+              {% endfor %}
+            </div>
+          </div>
+          {% if review.comment %}
+          <p style="color:var(--gray); font-size:0.88rem; margin:0; padding-left:52px;">{{ review.comment }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state" style="padding:3rem 0;">
+        <div class="empty-state-icon"><i class="bi bi-chat-square-text"></i></div>
+        <h4>No Reviews Yet</h4>
+        <p>Be the first to share your experience with this product.</p>
+      </div>
+      {% endif %}
+
+      <!-- Write Review -->
+      {% if user.is_authenticated and user_has_ordered %}
+      <div style="background:var(--light); border-radius:var(--radius-lg); padding:2rem; margin-top:2rem; border:1px solid var(--border);">
+        <h5 style="font-family:'Playfair Display',serif; color:var(--primary); margin-bottom:1.5rem;">Write a Review</h5>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Your Rating</label>
+            {{ review_form.rating }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Your Review</label>
+            {{ review_form.comment }}
+          </div>
+          <button type="submit" class="btn-novora">Submit Review <i class="bi bi-send ms-1"></i></button>
+        </form>
+      </div>
+      {% elif user.is_authenticated %}
+      <div style="background:var(--light); border-radius:var(--radius); padding:1rem 1.5rem; margin-top:1.5rem; border:1px solid var(--border);">
+        <i class="bi bi-info-circle me-2" style="color:var(--accent-dark);"></i>
+        <span style="font-size:0.88rem; color:var(--gray);">Only customers who have purchased and received this product can write a review.</span>
+      </div>
+      {% else %}
+      <div style="margin-top:1.5rem;">
+        <a href="{% url 'login' %}" class="btn-novora-outline"><i class="bi bi-person me-2"></i>Login to Write a Review</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

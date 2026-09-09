@@ -1,0 +1,233 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}NOVORA — Eastern & Western Fashion{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="container position-relative" style="z-index:1;">
+    <div class="row align-items-center">
+      <div class="col-lg-6 py-5">
+        <div class="hero-badge"><i class="bi bi-stars"></i> New Collection 2025 is Live</div>
+        <span class="hero-tagline">Eastern Elegance · Western Edge</span>
+        <h1 class="hero-title">Dress to<br><span class="highlight">Impress</span><br>Always.</h1>
+        <p class="hero-subtitle">Discover handpicked Eastern and Western fashion for every mood, every occasion, every you.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{% url 'product_list' %}" class="btn-hero-primary">
+            <i class="bi bi-bag-heart"></i> Shop Now
+          </a>
+          <a href="{% url 'product_list' %}?type=eastern" class="btn-hero-secondary">
+            <i class="bi bi-suit-heart"></i> Eastern Wear
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <span class="hero-stat-num">500+</span>
+            <span class="hero-stat-label">Products</span>
+          </div>
+          <div>
+            <span class="hero-stat-num">2K+</span>
+            <span class="hero-stat-label">Customers</span>
+          </div>
+          <div>
+            <span class="hero-stat-num">100%</span>
+            <span class="hero-stat-label">Authentic</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+        <div class="hero-float-card" style="max-width:340px; width:100%;">
+          <i class="bi bi-bag-heart-fill" style="font-size:5rem; color:var(--accent); display:block; margin-bottom:1rem;"></i>
+          <h3 style="font-family:'Playfair Display',serif; color:white; margin-bottom:0.5rem;">NOVORA</h3>
+          <p style="color:rgba(255,255,255,0.6); font-size:0.85rem; margin-bottom:1.5rem;">Your Style. Your Story.</p>
+          <div class="d-flex gap-3 justify-content-center text-center">
+            <div><div style="font-size:1.3rem; font-weight:700; color:var(--accent);">★ 4.9</div><div style="font-size:0.7rem; color:rgba(255,255,255,0.5);">Rating</div></div>
+            <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
+            <div><div style="font-size:1.3rem; font-weight:700; color:var(--accent);">Free</div><div style="font-size:0.7rem; color:rgba(255,255,255,0.5);">Delivery</div></div>
+            <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
+            <div><div style="font-size:1.3rem; font-weight:700; color:var(--accent);">COD</div><div style="font-size:0.7rem; color:rgba(255,255,255,0.5);">Available</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="py-5 bg-light-novora">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <span class="section-label">Collections</span>
+      <h2 class="section-title">Shop by Style</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-5">
+        <a href="{% url 'product_list' %}?type=eastern">
+          <div class="category-card category-card-eastern">
+            <div class="category-card-bg"></div>
+            <div class="category-card-overlay"></div>
+            <div class="category-card-body">
+              <span class="category-card-tag">Collection</span>
+              <h3 class="category-card-title">Eastern Wear</h3>
+              <p class="category-card-sub">Shalwar Kameez · Kurtas · Abayas · Waistcoats</p>
+              <span class="category-card-arrow">Explore <i class="bi bi-arrow-right"></i></span>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-5">
+        <a href="{% url 'product_list' %}?type=western">
+          <div class="category-card category-card-western">
+            <div class="category-card-bg"></div>
+            <div class="category-card-overlay"></div>
+            <div class="category-card-body">
+              <span class="category-card-tag">Collection</span>
+              <h3 class="category-card-title">Western Wear</h3>
+              <p class="category-card-sub">Shirts · Jeans · Hoodies · Dresses · Trousers</p>
+              <span class="category-card-arrow">Explore <i class="bi bi-arrow-right"></i></span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+{% if featured %}
+<section class="py-5">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <span class="section-label">Handpicked</span>
+      <h2 class="section-title">Featured Products</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4">
+      {% for product in featured %}
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="product-card h-100">
+          <div class="product-card-img-wrap">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+            <div class="product-card-placeholder">
+              <i class="bi bi-bag fs-2 mb-2"></i><span style="font-size:0.75rem;">No Image</span>
+            </div>
+            {% endif %}
+            <span class="product-card-badge badge-{{ product.category.category_type }}">{{ product.category.name }}</span>
+            {% if user.is_authenticated %}
+            <a href="{% url 'toggle_wishlist' product.id %}" class="product-card-wishlist">
+              <i class="bi bi-heart fs-6"></i>
+            </a>
+            {% endif %}
+            <a href="{% url 'product_detail' product.slug %}" class="product-card-overlay-btn">Quick View</a>
+          </div>
+          <div class="product-card-body">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <h6 class="product-card-name">{{ product.name }}</h6>
+              <span class="product-card-rating ms-2"><i class="bi bi-star-fill"></i> {{ product.average_rating }}</span>
+            </div>
+            <p class="product-card-desc">{{ product.description }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="product-card-price">PKR {{ product.price }}</span>
+              <a href="{% url 'product_detail' product.slug %}" class="btn-novora" style="padding:0.4rem 1rem; font-size:0.75rem;">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- NEW ARRIVALS -->
+{% if new_arrivals %}
+<section class="py-5 bg-light-novora">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <span class="section-label">Fresh In</span>
+      <h2 class="section-title">New Arrivals</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4">
+      {% for product in new_arrivals %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="product-card h-100">
+          <div class="product-card-img-wrap" style="height:200px;">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+            <div class="product-card-placeholder"><i class="bi bi-bag fs-3"></i></div>
+            {% endif %}
+            <a href="{% url 'product_detail' product.slug %}" class="product-card-overlay-btn" style="font-size:0.72rem;">View</a>
+          </div>
+          <div class="product-card-body" style="padding:0.9rem;">
+            <h6 class="product-card-name" style="font-size:0.88rem;">{{ product.name }}</h6>
+            <span class="product-card-price" style="font-size:0.95rem;">PKR {{ product.price }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+      <a href="{% url 'product_list' %}" class="btn-novora-accent">View All Products <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- WHY NOVORA -->
+<section class="py-5">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <span class="section-label">Why Us</span>
+      <h2 class="section-title">The NOVORA Promise</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4 text-center">
+      {% for icon, title, desc in perks %}
+      {% empty %}
+      {% endfor %}
+      <div class="col-md-3 col-6">
+        <div class="p-4 rounded-novora-lg h-100" style="background:var(--light);">
+          <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;color:var(--primary);">
+            <i class="bi bi-truck"></i>
+          </div>
+          <h6 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary);">Fast Delivery</h6>
+          <p style="font-size:0.82rem; color:var(--gray); margin:0;">Quick & reliable delivery across Pakistan</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="p-4 rounded-novora-lg h-100" style="background:var(--light);">
+          <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;color:var(--primary);">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <h6 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary);">100% Authentic</h6>
+          <p style="font-size:0.82rem; color:var(--gray); margin:0;">Only genuine, high-quality products</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="p-4 rounded-novora-lg h-100" style="background:var(--light);">
+          <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;color:var(--primary);">
+            <i class="bi bi-cash-coin"></i>
+          </div>
+          <h6 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary);">Cash on Delivery</h6>
+          <p style="font-size:0.82rem; color:var(--gray); margin:0;">Pay when your order arrives safely</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="p-4 rounded-novora-lg h-100" style="background:var(--light);">
+          <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;color:var(--primary);">
+            <i class="bi bi-arrow-counterclockwise"></i>
+          </div>
+          <h6 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary);">Easy Returns</h6>
+          <p style="font-size:0.82rem; color:var(--gray); margin:0;">Hassle-free 7-day return policy</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

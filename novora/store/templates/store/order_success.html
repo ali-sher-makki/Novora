@@ -1,0 +1,60 @@
+{% extends 'store/base.html' %}
+{% block title %}Order Confirmed — NOVORA{% endblock %}
+{% block content %}
+<div class="success-page">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-6">
+        <div class="success-card">
+          <div class="success-icon"><i class="bi bi-check-lg"></i></div>
+          <h2 style="font-family:'Playfair Display',serif; color:var(--primary); margin-bottom:0.5rem;">Order Confirmed!</h2>
+          <p style="color:var(--gray); font-size:0.92rem; margin-bottom:2rem;">Thank you for shopping with NOVORA. Your order has been placed successfully.</p>
+
+          <div style="background:var(--light); border-radius:var(--radius-lg); padding:1.5rem; text-align:left; margin-bottom:2rem; border:1px solid var(--border);">
+            <div class="row g-3">
+              <div class="col-6">
+                <span style="font-size:0.72rem; color:var(--gray); text-transform:uppercase; letter-spacing:1px; font-weight:700; display:block;">Order ID</span>
+                <span style="font-weight:700; color:var(--primary); font-family:'Playfair Display',serif;">#{{ order.id }}</span>
+              </div>
+              <div class="col-6">
+                <span style="font-size:0.72rem; color:var(--gray); text-transform:uppercase; letter-spacing:1px; font-weight:700; display:block;">Total Amount</span>
+                <span style="font-weight:700; color:var(--primary); font-family:'Playfair Display',serif;">PKR {{ order.total_amount }}</span>
+              </div>
+              <div class="col-6">
+                <span style="font-size:0.72rem; color:var(--gray); text-transform:uppercase; letter-spacing:1px; font-weight:700; display:block;">Payment</span>
+                <span style="font-size:0.9rem; color:var(--primary);">{{ order.get_payment_method_display }}</span>
+              </div>
+              <div class="col-6">
+                <span style="font-size:0.72rem; color:var(--gray); text-transform:uppercase; letter-spacing:1px; font-weight:700; display:block;">Status</span>
+                <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+              </div>
+              <div class="col-12">
+                <span style="font-size:0.72rem; color:var(--gray); text-transform:uppercase; letter-spacing:1px; font-weight:700; display:block;">Delivery Address</span>
+                <span style="font-size:0.88rem; color:var(--primary);">{{ order.address }}, {{ order.city }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- COD Note -->
+          <div style="background:#f0fff4; border:1px solid #c3e6cb; border-radius:var(--radius); padding:1rem 1.2rem; margin-bottom:2rem; text-align:left; display:flex; gap:0.8rem; align-items:flex-start;">
+            <i class="bi bi-cash-coin" style="color:#28a745; font-size:1.3rem; flex-shrink:0;"></i>
+            <div>
+              <div style="font-weight:700; color:#155724; font-size:0.85rem;">Cash on Delivery</div>
+              <div style="color:#155724; font-size:0.8rem; opacity:0.85;">Please keep PKR {{ order.total_amount }} ready when our delivery partner arrives.</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'profile' %}" class="btn-novora">
+              <i class="bi bi-bag-check me-2"></i>View My Orders
+            </a>
+            <a href="{% url 'product_list' %}" class="btn-novora-outline">
+              <i class="bi bi-bag me-2"></i>Continue Shopping
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

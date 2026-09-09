@@ -1,0 +1,111 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}Checkout — NOVORA{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <h1 class="page-header-title"><i class="bi bi-lock me-3"></i>Secure Checkout</h1>
+    <p style="color:rgba(255,255,255,0.6); margin:0; font-size:0.9rem;">
+      <a href="{% url 'home' %}" style="color:var(--accent);">Home</a> &rsaquo;
+      <a href="{% url 'cart' %}" style="color:var(--accent);">Cart</a> &rsaquo; Checkout
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+
+    <!-- FORM -->
+    <div class="col-lg-7">
+      <div style="background:white; border-radius:var(--radius-lg); padding:2.5rem; box-shadow:var(--shadow-sm); border:1px solid var(--border);">
+        <h4 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin-bottom:2rem;">
+          <i class="bi bi-geo-alt me-2" style="color:var(--accent-dark);"></i>Shipping Information
+        </h4>
+        <form method="POST" class="novora-form">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Full Name</label>
+              <input type="text" name="full_name" class="form-control" value="{{ form.full_name.value|default:'' }}" placeholder="Enter your full name" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email Address</label>
+              <input type="email" name="email" class="form-control" value="{{ form.email.value|default:'' }}" placeholder="your@email.com" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Phone Number</label>
+              <input type="text" name="phone" class="form-control" value="{{ form.phone.value|default:'' }}" placeholder="+92 300 0000000" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Full Address</label>
+              <textarea name="address" class="form-control" rows="3" placeholder="Street address, house number, area..." required>{{ form.address.value|default:'' }}</textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">City</label>
+              <input type="text" name="city" class="form-control" value="{{ form.city.value|default:'' }}" placeholder="e.g. Bahawalpur" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Payment Method</label>
+              <select name="payment_method" class="form-select">
+                <option value="cod">💵 Cash on Delivery (COD)</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-novora-accent w-100 justify-content-center mt-4" style="display:flex; padding:1rem; font-size:0.9rem;">
+            <i class="bi bi-check-circle me-2"></i> Place Order Now
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ORDER SUMMARY -->
+    <div class="col-lg-5">
+      <div class="order-summary-card">
+        <h5 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
+          <i class="bi bi-receipt me-2" style="color:var(--accent-dark);"></i>Your Order
+        </h5>
+        {% for item in cart.items.all %}
+        <div class="d-flex align-items-center gap-3 mb-3">
+          {% if item.product.image %}
+          <img src="{{ item.product.image.url }}" style="width:55px; height:55px; object-fit:cover; border-radius:var(--radius);" alt="{{ item.product.name }}">
+          {% else %}
+          <div style="width:55px; height:55px; background:var(--light); border-radius:var(--radius); display:flex; align-items:center; justify-content:center;">
+            <i class="bi bi-bag text-muted"></i>
+          </div>
+          {% endif %}
+          <div class="flex-grow-1">
+            <div style="font-size:0.88rem; font-weight:600; color:var(--primary);">{{ item.product.name }}</div>
+            <div style="font-size:0.75rem; color:var(--gray);">Size: {{ item.size }} · Qty: {{ item.quantity }}</div>
+          </div>
+          <div style="font-size:0.9rem; font-weight:700; color:var(--primary);">PKR {{ item.subtotal }}</div>
+        </div>
+        {% endfor %}
+        <hr style="border-color:var(--border);">
+        <div class="d-flex justify-content-between mb-2">
+          <span style="color:var(--gray); font-size:0.88rem;">Subtotal</span>
+          <span style="font-weight:600; font-size:0.88rem;">PKR {{ cart.total_price }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+          <span style="color:var(--gray); font-size:0.88rem;">Shipping</span>
+          <span style="color:#28a745; font-weight:600; font-size:0.88rem;">Free</span>
+        </div>
+        <div style="background:var(--light); border-radius:var(--radius); padding:1rem 1.2rem;">
+          <div class="d-flex justify-content-between">
+            <span style="font-weight:700; color:var(--primary);">Grand Total</span>
+            <span style="font-size:1.3rem; font-weight:700; color:var(--primary); font-family:'Playfair Display',serif;">PKR {{ cart.total_price }}</span>
+          </div>
+        </div>
+        <!-- COD Notice -->
+        <div style="background:#f0fff4; border:1px solid #c3e6cb; border-radius:var(--radius); padding:1rem; margin-top:1.2rem; display:flex; gap:0.7rem; align-items:flex-start;">
+          <i class="bi bi-cash-coin" style="color:#28a745; font-size:1.2rem; flex-shrink:0; margin-top:2px;"></i>
+          <div>
+            <div style="font-size:0.82rem; font-weight:700; color:#155724;">Cash on Delivery</div>
+            <div style="font-size:0.78rem; color:#155724; opacity:0.8;">Pay when your order arrives at your doorstep. No advance payment required.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

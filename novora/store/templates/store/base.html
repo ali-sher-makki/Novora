@@ -1,0 +1,713 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}NOVORA{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="novora-navbar navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand-novora" href="{% url 'home' %}">NOV<span>O</span>RA</a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <i class="bi bi-list text-white fs-4"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav mx-auto">
+        {% if request.user.is_superuser %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Admin</a></li>
+        {% endif %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}?type=eastern">Eastern Wear</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}?type=western">Western Wear</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}">All Products</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <!-- Search -->
+        <form class="navbar-search d-flex" method="GET" action="{% url 'product_list' %}">
+          <input class="form-control" type="search" name="search" placeholder="Search...">
+          <button type="submit" class="btn"><i class="bi bi-search"></i></button>
+        </form>
+        <!-- AI Stylist Button -->
+        <a href="#aiStylistModal" data-bs-toggle="modal" class="btn-chatbot nav-link" id="navAiStylistBtn">
+          <i class="bi bi-stars me-1"></i>AI Stylist
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'wishlist' %}" class="nav-icon-link"><i class="bi bi-heart"></i></a>
+        <a href="{% url 'cart' %}" class="nav-icon-link"><i class="bi bi-bag"></i></a>
+        <div class="dropdown">
+          <a class="nav-icon-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle me-1"></i>{{ user.first_name|default:user.username }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+            <li><a class="dropdown-item py-2" href="{% url 'profile' %}"><i class="bi bi-person me-2 text-muted"></i>My Profile</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'cart' %}"><i class="bi bi-bag me-2 text-muted"></i>My Cart</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'wishlist' %}"><i class="bi bi-heart me-2 text-muted"></i>Wishlist</a></li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li><a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+        {% else %}
+        <a href="{% url 'login' %}" class="nav-link" style="color:rgba(255,255,255,0.85)!important; font-size:0.85rem;">Login</a>
+        <a href="{% url 'register' %}" class="btn-novora-accent" style="font-size:0.78rem; padding:0.4rem 1.1rem;">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MESSAGES (top-right toast style) -->
+{% if messages %}
+<div class="alert-novora-wrap">
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+    <i class="bi bi-{% if msg.tags == 'success' %}check-circle{% elif msg.tags == 'error' %}x-circle{% else %}info-circle{% endif %} me-2"></i>
+    {{ msg }}
+    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<!-- FOOTER -->
+<footer class="novora-footer">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-4">
+        <div class="footer-brand">NOV<span>O</span>RA</div>
+        <p class="footer-desc">Eastern elegance meets Western edge. Your ultimate destination for fashion that speaks your style — curated, crafted, and delivered to your door.</p>
+      </div>
+      <div class="col-lg-2 col-6">
+        <h6 class="footer-heading">Shop</h6>
+        <ul class="footer-links">
+          <li><a href="{% url 'product_list' %}?type=eastern">Eastern Wear</a></li>
+          <li><a href="{% url 'product_list' %}?type=western">Western Wear</a></li>
+          <li><a href="{% url 'product_list' %}">All Products</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-6">
+        <h6 class="footer-heading">Account</h6>
+        <ul class="footer-links">
+          <li><a href="{% url 'register' %}">Register</a></li>
+          <li><a href="{% url 'login' %}">Login</a></li>
+          <li><a href="{% url 'profile' %}">My Orders</a></li>
+          <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4">
+        <h6 class="footer-heading">Contact</h6>
+        <ul class="footer-links">
+          <li><i class="bi bi-envelope me-2" style="color:var(--accent)"></i>support@novora.pk</li>
+          <li><i class="bi bi-telephone me-2" style="color:var(--accent)"></i>+92 301 8380666</li>
+          <li><i class="bi bi-geo-alt me-2" style="color:var(--accent)"></i>Bahawalpur, Pakistan</li>
+        </ul>
+        <div class="d-flex gap-3 mt-3">
+          <a href="#" style="color:rgba(255,255,255,0.5); font-size:1.3rem; transition:var(--transition);" class="footer-social"><i class="bi bi-instagram"></i></a>
+          <a href="#" style="color:rgba(255,255,255,0.5); font-size:1.3rem; transition:var(--transition);" class="footer-social"><i class="bi bi-facebook"></i></a>
+          <a href="#" style="color:rgba(255,255,255,0.5); font-size:1.3rem; transition:var(--transition);" class="footer-social"><i class="bi bi-tiktok"></i></a>
+           <a target="_blank" href="https://www.facebook.com/profile.php?id=100045554527838" style="color:rgba(255,255,255,0.5); font-size:1.3rem; transition:var(--transition);" class="footer-social"><i class="bi bi-facebook"> Owner's Profile</i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 NOVORA. All rights reserved. Designed & Developed by Ali Sher Makki — IUB Computer Science.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     AI STYLIST STUDIO MODAL
+     ============================================================ -->
+<div class="modal fade modal-stylist" id="aiStylistModal" tabindex="-1" aria-labelledby="aiStylistModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <h5 class="modal-title mb-0" id="aiStylistModalLabel"><i class="bi bi-stars text-warning me-2"></i>NOVORA AI STYLIST</h5>
+            <span class="stylist-header-badge">Body Shape & Fashion AI</span>
+          </div>
+          <small class="text-white-50">Enter your measurements to discover your body type and get haute couture styling advice.</small>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <!-- FORM SECTION -->
+        <div id="stylistFormSection">
+          <form id="stylistForm">
+            {% csrf_token %}
+            <div class="row g-3">
+              <!-- Gender & Units Selector -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Gender</label>
+                <div class="stylist-seg-btn-group">
+                  <input type="radio" name="gender" id="genderFemale" value="female" checked>
+                  <label for="genderFemale"><i class="bi bi-gender-female me-1"></i>Women</label>
+                  <input type="radio" name="gender" id="genderMale" value="male">
+                  <label for="genderMale"><i class="bi bi-gender-male me-1"></i>Men</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Measurement Unit</label>
+                <div class="stylist-seg-btn-group">
+                  <input type="radio" name="unit" id="unitInches" value="in" checked>
+                  <label for="unitInches">Inches (in)</label>
+                  <input type="radio" name="unit" id="unitCm" value="cm">
+                  <label for="unitCm">Centimeters (cm)</label>
+                </div>
+              </div>
+
+              <!-- Measurement Fields -->
+              <div class="col-12 mt-3">
+                <div class="stylist-form-card">
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <div class="stylist-input-group">
+                        <label for="bustInput">
+                          <span id="bustLabelText">Bust / Chest</span>
+                          <small id="bustUnitLabel">(in)</small>
+                        </label>
+                        <input type="number" step="0.1" class="form-control" id="bustInput" placeholder="e.g. 36" required>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="stylist-input-group">
+                        <label for="waistInput">
+                          <span>Waist (Narrowest)</span>
+                          <small id="waistUnitLabel">(in)</small>
+                        </label>
+                        <input type="number" step="0.1" class="form-control" id="waistInput" placeholder="e.g. 28" required>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="stylist-input-group">
+                        <label for="hipsInput">
+                          <span>Hips (Fullest)</span>
+                          <small id="hipsUnitLabel">(in)</small>
+                        </label>
+                        <input type="number" step="0.1" class="form-control" id="hipsInput" placeholder="e.g. 38" required>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="stylist-input-group">
+                        <label for="stylePref">Preferred Style</label>
+                        <select class="form-select" id="stylePref">
+                          <option value="all">All Styles (Eastern & Western)</option>
+                          <option value="eastern">Eastern Wear (Kurtis, Suits, Anarkalis)</option>
+                          <option value="western">Western Wear (Dresses, Tops, Blazers)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="stylist-input-group">
+                        <label for="occasionSelect">Occasion / Vibe</label>
+                        <select class="form-select" id="occasionSelect">
+                          <option value="all">Any Occasion</option>
+                          <option value="casual">Everyday Casual & Workwear</option>
+                          <option value="festive">Festive, Eid & Wedding Celebrations</option>
+                          <option value="party">Evening Party & Formal</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Measurement Guide Tip -->
+              <div class="col-12">
+                <div class="stylist-tip-box d-flex align-items-start gap-2">
+                  <i class="bi bi-info-circle-fill text-warning fs-6 mt-1"></i>
+                  <div>
+                    <strong>Quick Measuring Tip:</strong> Keep the tape snug but not tight. Measure <strong>Bust/Chest</strong> at the fullest point, <strong>Waist</strong> at your natural indentation (above belly button), and <strong>Hips</strong> at the widest point around your seat.
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 mt-2">
+                <button type="submit" class="btn btn-novora-accent w-100 py-3 shadow-sm" style="font-size: 1rem; letter-spacing: 0.5px;">
+                  <i class="bi bi-magic me-2"></i>Analyze Body Type & Get Styled
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- LOADING SECTION -->
+        <div id="stylistLoadingSection" class="text-center py-5 d-none">
+          <div class="spinner-grow text-warning mb-3" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
+          <h5 class="fw-bold text-dark">Novora AI is Analyzing Your Silhouette...</h5>
+          <p class="text-muted small">Calculating proportion geometry, styling rules, and curating matching items from our store.</p>
+        </div>
+
+        <!-- RESULTS SECTION -->
+        <div id="stylistResultsSection" class="d-none">
+          <!-- Hero Card with Body Shape -->
+          <div class="stylist-result-hero mb-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+              <div>
+                <div class="stylist-body-badge" id="resBodyBadge">
+                  <i class="bi bi-gem"></i> <span id="resBodyName">Hourglass Figure</span>
+                </div>
+                <h4 class="text-white mb-1" id="resBodyTagline">Balanced curves with a well-defined waistline.</h4>
+                <p class="text-white-50 small mb-0" id="resBodyGoal">Highlight your natural waistline while maintaining balance.</p>
+              </div>
+            </div>
+            <div class="mt-3">
+              <span class="stylist-metric-pill" id="resWaistBustMetric"><i class="bi bi-rulers me-1"></i>Waist-to-Bust: 0.75</span>
+              <span class="stylist-metric-pill" id="resWaistHipMetric"><i class="bi bi-rulers me-1"></i>Waist-to-Hip: 0.72</span>
+            </div>
+          </div>
+
+          <!-- AI Stylist Personal Note -->
+          <div class="stylist-ai-note mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-chat-heart-fill text-danger fs-5"></i>
+              <strong class="text-dark">Novora Stylist Note:</strong>
+            </div>
+            <p class="mb-0 text-secondary" id="resAiNote"></p>
+          </div>
+
+          <!-- Styling Recommendations Navigation -->
+          <ul class="nav nav-pills mb-3 gap-2" id="stylistTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active rounded-pill px-3 py-2 small fw-semibold" id="tab-eastern-btn" data-bs-toggle="pill" data-bs-target="#tab-eastern" type="button" role="tab">
+                <i class="bi bi-stars me-1 text-warning"></i>Eastern Styling
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill px-3 py-2 small fw-semibold" id="tab-western-btn" data-bs-toggle="pill" data-bs-target="#tab-western" type="button" role="tab">
+                <i class="bi bi-lightning-charge me-1 text-primary"></i>Western Styling
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill px-3 py-2 small fw-semibold" id="tab-dos-btn" data-bs-toggle="pill" data-bs-target="#tab-dos" type="button" role="tab">
+                <i class="bi bi-check-circle me-1 text-success"></i>Dos & Don'ts
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tab Content -->
+          <div class="tab-content mb-4" id="stylistTabContent">
+            <!-- Eastern Tab -->
+            <div class="tab-pane fade show active" id="tab-eastern" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="stylist-guide-card">
+                    <h6><i class="bi bi-scissors text-danger"></i>Best Eastern Silhouettes & Cuts</h6>
+                    <div id="resEasternCuts"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="stylist-guide-card">
+                    <h6><i class="bi bi-palette text-primary"></i>Recommended Fabrics & Necklines</h6>
+                    <p class="small text-muted mb-1"><strong>Fabrics:</strong></p>
+                    <div id="resEasternFabrics" class="mb-2"></div>
+                    <p class="small text-muted mb-1"><strong>Flattering Necklines:</strong></p>
+                    <div id="resEasternNecklines"></div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="p-3 bg-light rounded-3 border">
+                    <small class="text-dark"><strong><i class="bi bi-lightbulb-fill text-warning me-1"></i>Pro Eastern Draping Tip:</strong> <span id="resEasternTip"></span></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Western Tab -->
+            <div class="tab-pane fade" id="tab-western" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="stylist-guide-card">
+                    <h6><i class="bi bi-award text-success"></i>Best Western Silhouettes</h6>
+                    <div id="resWesternCuts"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="stylist-guide-card">
+                    <h6><i class="bi bi-layers text-info"></i>Fabrics & Collars</h6>
+                    <p class="small text-muted mb-1"><strong>Fabrics:</strong></p>
+                    <div id="resWesternFabrics" class="mb-2"></div>
+                    <p class="small text-muted mb-1"><strong>Necklines & Collars:</strong></p>
+                    <div id="resWesternNecklines"></div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="p-3 bg-light rounded-3 border">
+                    <small class="text-dark"><strong><i class="bi bi-lightbulb-fill text-warning me-1"></i>Pro Western Tip:</strong> <span id="resWesternTip"></span></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dos & Don'ts Tab -->
+            <div class="tab-pane fade" id="tab-dos" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="stylist-guide-card" style="border-left: 3px solid #198754;">
+                    <h6 class="text-success"><i class="bi bi-check2-circle"></i>Styling Dos</h6>
+                    <div id="resDosList"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="stylist-guide-card" style="border-left: 3px solid #dc3545;">
+                    <h6 class="text-danger"><i class="bi bi-x-circle"></i>What to Avoid</h6>
+                    <div id="resDontsList"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommended Novora Outfits -->
+          <div class="mt-4 pt-3 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-bag-heart me-2 text-warning"></i>Novora Outfits Picked For You</h5>
+              <a href="{% url 'product_list' %}" class="small text-decoration-none fw-semibold" style="color:var(--accent-dark);">View All Collection &rarr;</a>
+            </div>
+            <div class="row g-3" id="resProductsGrid">
+              <!-- Dynamic Product Cards -->
+            </div>
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="btnModifyMeasurements">
+              <i class="bi bi-arrow-left me-1"></i>Modify Measurements
+            </button>
+            <button type="button" class="btn btn-novora-accent rounded-pill px-4" id="btnAskStylistChat">
+              <i class="bi bi-chat-dots-fill me-1"></i>Ask Chat Stylist
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Chatbot -->
+<div class="chatbot-wrapper">
+  <button id="chatbotToggleBtn" class="chatbot-toggle-btn" aria-label="Open Chatbot">
+    <i class="bi bi-chat-dots-fill"></i>
+  </button>
+  <div id="chatbotContainer" class="chatbot-container d-none">
+    <div class="chatbot-header">
+      <div>
+        <h6 class="mb-0 text-white"><i class="bi bi-robot me-2"></i>Novora AI Stylist & Support</h6>
+        <small class="text-white-50">We reply immediately</small>
+      </div>
+      <button id="chatbotClose" class="btn-close btn-close-white" aria-label="Close"></button>
+    </div>
+    <div class="chatbot-body" id="chatbotBody">
+      <div class="chat-message bot">
+        Hello! I'm your Novora AI Stylist & Support Assistant. How can I help you style your perfect outfit today?
+      </div>
+    </div>
+    <div class="chatbot-footer">
+      <input type="text" id="chatbotInput" placeholder="Type a message..." class="form-control">
+      <button id="chatbotSend" class="btn btn-chatbot-send" aria-label="Send message"><i class="bi bi-send-fill"></i></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Auto-dismiss alerts after 4 seconds
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => {
+      let bsAlert = bootstrap.Alert.getOrCreateInstance(a);
+      bsAlert.close();
+    });
+  }, 4000);
+
+  // ============================================================
+  // AI STYLIST STUDIO SCRIPT
+  // ============================================================
+  const stylistForm = document.getElementById('stylistForm');
+  const stylistFormSection = document.getElementById('stylistFormSection');
+  const stylistLoadingSection = document.getElementById('stylistLoadingSection');
+  const stylistResultsSection = document.getElementById('stylistResultsSection');
+  const btnModifyMeasurements = document.getElementById('btnModifyMeasurements');
+  const btnAskStylistChat = document.getElementById('btnAskStylistChat');
+
+  const unitRadios = document.querySelectorAll('input[name="unit"]');
+  const bustUnitLabel = document.getElementById('bustUnitLabel');
+  const waistUnitLabel = document.getElementById('waistUnitLabel');
+  const hipsUnitLabel = document.getElementById('hipsUnitLabel');
+  const bustInput = document.getElementById('bustInput');
+  const waistInput = document.getElementById('waistInput');
+  const hipsInput = document.getElementById('hipsInput');
+
+  let currentAnalysisData = null;
+
+  // Unit Toggle handler
+  unitRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const u = e.target.value === 'cm' ? '(cm)' : '(in)';
+      bustUnitLabel.textContent = u;
+      waistUnitLabel.textContent = u;
+      hipsUnitLabel.textContent = u;
+      if (e.target.value === 'cm') {
+        bustInput.placeholder = 'e.g. 91';
+        waistInput.placeholder = 'e.g. 71';
+        hipsInput.placeholder = 'e.g. 96';
+      } else {
+        bustInput.placeholder = 'e.g. 36';
+        waistInput.placeholder = 'e.g. 28';
+        hipsInput.placeholder = 'e.g. 38';
+      }
+    });
+  });
+
+  // Switch back to form
+  if (btnModifyMeasurements) {
+    btnModifyMeasurements.addEventListener('click', () => {
+      stylistResultsSection.classList.add('d-none');
+      stylistFormSection.classList.remove('d-none');
+    });
+  }
+
+  // Switch to Chatbot with context
+  if (btnAskStylistChat) {
+    btnAskStylistChat.addEventListener('click', () => {
+      const modalEl = document.getElementById('aiStylistModal');
+      const bsModal = bootstrap.Modal.getInstance(modalEl);
+      if (bsModal) bsModal.hide();
+      
+      chatbotContainer.classList.remove('d-none');
+      if (currentAnalysisData) {
+        chatbotInput.value = `Can you recommend specific accessories and shoes for my ${currentAnalysisData.body_type.name}?`;
+        chatbotInput.focus();
+      }
+    });
+  }
+
+  // Handle Form Submit
+  if (stylistForm) {
+    stylistForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const gender = document.querySelector('input[name="gender"]:checked').value;
+      const unit = document.querySelector('input[name="unit"]:checked').value;
+      const bust = parseFloat(bustInput.value);
+      const waist = parseFloat(waistInput.value);
+      const hips = parseFloat(hipsInput.value);
+      const stylePref = document.getElementById('stylePref').value;
+      const occasion = document.getElementById('occasionSelect').value;
+
+      if (!bust || !waist || !hips) {
+        alert('Please fill in all measurement fields.');
+        return;
+      }
+
+      // Show loading
+      stylistFormSection.classList.add('d-none');
+      stylistLoadingSection.classList.remove('d-none');
+
+      try {
+        const response = await fetch('/api/ai-stylist/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({
+            gender,
+            unit,
+            bust,
+            waist,
+            hips,
+            style_pref: stylePref,
+            occasion
+          })
+        });
+
+        const data = await response.json();
+        stylistLoadingSection.classList.add('d-none');
+
+        if (data.success) {
+          currentAnalysisData = data;
+          renderStylistResults(data);
+          stylistResultsSection.classList.remove('d-none');
+        } else {
+          alert(data.error || 'Failed to analyze measurements.');
+          stylistFormSection.classList.remove('d-none');
+        }
+      } catch (err) {
+        stylistLoadingSection.classList.add('d-none');
+        stylistFormSection.classList.remove('d-none');
+        alert('Network error while analyzing style. Please try again.');
+      }
+    });
+  }
+
+  function renderStylistResults(data) {
+    const bt = data.body_type;
+
+    // Badge & Hero
+    const badgeEl = document.getElementById('resBodyBadge');
+    badgeEl.innerHTML = `<i class="bi ${bt.badge_icon || 'bi-gem'} me-1"></i> <span>${bt.name}</span>`;
+    document.getElementById('resBodyTagline').textContent = bt.tagline;
+    document.getElementById('resBodyGoal').textContent = bt.goal;
+
+    // Metrics
+    document.getElementById('resWaistBustMetric').innerHTML = `<i class="bi bi-rulers me-1"></i>Waist-to-Bust: ${data.proportions.waist_to_bust}`;
+    document.getElementById('resWaistHipMetric').innerHTML = `<i class="bi bi-rulers me-1"></i>Waist-to-Hip: ${data.proportions.waist_to_hip}`;
+
+    // AI Note
+    document.getElementById('resAiNote').innerHTML = data.ai_note.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Eastern Guide
+    const eCuts = document.getElementById('resEasternCuts');
+    eCuts.innerHTML = bt.eastern.best_cuts.map(c => `<div class="stylist-do-item"><i class="bi bi-check-circle-fill"></i><span>${c}</span></div>`).join('');
+
+    const eFabrics = document.getElementById('resEasternFabrics');
+    eFabrics.innerHTML = bt.eastern.fabrics.map(f => `<span class="stylist-pill-tag">${f}</span>`).join('');
+
+    const eNecklines = document.getElementById('resEasternNecklines');
+    eNecklines.innerHTML = bt.eastern.necklines.map(n => `<span class="stylist-pill-tag">${n}</span>`).join('');
+
+    document.getElementById('resEasternTip').textContent = bt.eastern.styling_tip;
+
+    // Western Guide
+    const wCuts = document.getElementById('resWesternCuts');
+    wCuts.innerHTML = bt.western.best_cuts.map(c => `<div class="stylist-do-item"><i class="bi bi-check-circle-fill"></i><span>${c}</span></div>`).join('');
+
+    const wFabrics = document.getElementById('resWesternFabrics');
+    wFabrics.innerHTML = bt.western.fabrics.map(f => `<span class="stylist-pill-tag">${f}</span>`).join('');
+
+    const wNecklines = document.getElementById('resWesternNecklines');
+    wNecklines.innerHTML = bt.western.necklines.map(n => `<span class="stylist-pill-tag">${n}</span>`).join('');
+
+    document.getElementById('resWesternTip').textContent = bt.western.styling_tip;
+
+    // Dos & Don'ts
+    const dosList = document.getElementById('resDosList');
+    dosList.innerHTML = bt.dos.map(d => `<div class="stylist-do-item"><i class="bi bi-check-circle-fill"></i><span>${d}</span></div>`).join('');
+
+    const dontsList = document.getElementById('resDontsList');
+    dontsList.innerHTML = bt.donts.map(d => `<div class="stylist-dont-item"><i class="bi bi-x-circle-fill"></i><span>${d}</span></div>`).join('');
+
+    // Products Grid
+    const prodGrid = document.getElementById('resProductsGrid');
+    if (data.recommended_products && data.recommended_products.length > 0) {
+      prodGrid.innerHTML = data.recommended_products.map(p => `
+        <div class="col-6 col-md-4">
+          <div class="stylist-product-card">
+            <a href="/product/${p.slug}/">
+              ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `<div style="height:140px; background:#f0f0f0;" class="d-flex align-items-center justify-content-center text-muted"><i class="bi bi-image fs-3"></i></div>`}
+            </a>
+            <div class="card-body">
+              <div>
+                <span class="badge bg-light text-dark border mb-1" style="font-size:0.68rem;">${p.category_name}</span>
+                <a href="/product/${p.slug}/" class="product-title text-decoration-none">${p.name}</a>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="product-price">Rs. ${p.price}</span>
+                <a href="/product/${p.slug}/" class="btn btn-sm btn-outline-dark rounded-pill" style="font-size:0.75rem;">View</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      prodGrid.innerHTML = `
+        <div class="col-12 text-center py-3 text-muted">
+          <p class="small mb-0">Browse our latest arrivals in the store to find your perfect fit.</p>
+        </div>
+      `;
+    }
+  }
+
+  // ============================================================
+  // FLOATING CHATBOT LOGIC
+  // ============================================================
+  const chatbotToggleBtn = document.getElementById('chatbotToggleBtn');
+  const chatbotContainer = document.getElementById('chatbotContainer');
+  const chatbotClose = document.getElementById('chatbotClose');
+  const chatbotInput = document.getElementById('chatbotInput');
+  const chatbotSend = document.getElementById('chatbotSend');
+  const chatbotBody = document.getElementById('chatbotBody');
+
+  function toggleChatbot(e) {
+    if(e) e.preventDefault();
+    chatbotContainer.classList.toggle('d-none');
+    if(!chatbotContainer.classList.contains('d-none')) {
+      chatbotInput.focus();
+    }
+  }
+
+  if(chatbotToggleBtn) chatbotToggleBtn.addEventListener('click', toggleChatbot);
+  if(chatbotClose) chatbotClose.addEventListener('click', toggleChatbot);
+
+  function appendMessage(sender, text) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-message ${sender}`;
+    msgDiv.textContent = text;
+    chatbotBody.appendChild(msgDiv);
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+  }
+
+  async function handleSend() {
+    const text = chatbotInput.value.trim();
+    if(!text) return;
+    
+    // User message
+    appendMessage('user', text);
+    chatbotInput.value = '';
+    
+    // Add loading indicator
+    const loadingId = 'loading-' + Date.now();
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-message bot';
+    msgDiv.id = loadingId;
+    msgDiv.innerHTML = '<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Thinking...';
+    chatbotBody.appendChild(msgDiv);
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+
+    try {
+      const response = await fetch('/api/chatbot/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ message: text })
+      });
+      
+      const data = await response.json();
+      
+      // Remove loading indicator
+      const loader = document.getElementById(loadingId);
+      if (loader) loader.remove();
+      
+      // Bot reply
+      if(data.reply) {
+        appendMessage('bot', data.reply);
+      } else {
+        appendMessage('bot', "I'm sorry, I encountered an error. Please try again.");
+      }
+    } catch (error) {
+      const loader = document.getElementById(loadingId);
+      if (loader) loader.remove();
+      appendMessage('bot', "Connection error. Please check your internet connection.");
+    }
+  }
+
+  if(chatbotSend) chatbotSend.addEventListener('click', handleSend);
+  if(chatbotInput) chatbotInput.addEventListener('keypress', (e) => {
+    if(e.key === 'Enter') handleSend();
+  });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

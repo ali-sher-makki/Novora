@@ -1,0 +1,726 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}My Profile — NOVORA{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-cover {
+    height: 220px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .profile-cover::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(232,180,184,0.12) 0%, transparent 70%);
+    top: -150px; right: -100px;
+    border-radius: 50%;
+  }
+  .profile-cover::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+    bottom: -80px; left: -50px;
+    border-radius: 50%;
+  }
+  .profile-avatar-wrap {
+    position: absolute;
+    bottom: -50px;
+    left: 40px;
+    z-index: 10;
+  }
+  .profile-avatar-img {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    border: 4px solid white;
+    object-fit: cover;
+    box-shadow: var(--shadow-md);
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .profile-avatar-edit {
+    position: absolute;
+    bottom: 4px; right: 4px;
+    width: 28px; height: 28px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 0.65rem;
+    cursor: pointer;
+    border: 2px solid white;
+    transition: var(--transition);
+  }
+  .profile-avatar-edit:hover { background: var(--accent-dark); }
+
+  .profile-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .profile-tab-nav {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    background: white;
+    padding: 0 1.5rem;
+    gap: 0;
+  }
+  .profile-tab-btn {
+    padding: 1rem 1.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .profile-tab-btn:hover { color: var(--primary); }
+  .profile-tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+  .profile-tab-content { display: none; padding: 2rem; }
+  .profile-tab-content.active { display: block; }
+
+  .stat-pill {
+    background: var(--light);
+    border-radius: 50px;
+    padding: 0.5rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border);
+  }
+  .stat-pill-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .stat-pill-label {
+    font-size: 0.72rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row-icon {
+    width: 38px; height: 38px;
+    background: var(--light);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    color: var(--accent-dark);
+    flex-shrink: 0;
+  }
+  .info-row-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gray);
+    display: block;
+  }
+  .info-row-value {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: block;
+  }
+
+  .measurement-card {
+    background: linear-gradient(135deg, var(--primary), #0f3460);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    color: white;
+  }
+  .measurement-item {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+  }
+  .measurement-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+  .measurement-lbl {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  .order-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    margin-bottom: 0.8rem;
+    transition: var(--transition);
+    background: white;
+  }
+  .order-row:hover {
+    box-shadow: var(--shadow-md);
+    border-color: transparent;
+    transform: translateX(4px);
+  }
+  .order-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .novora-input {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.7rem 1rem;
+    font-size: 0.88rem;
+    color: var(--primary);
+    background: #fdfcfb;
+    transition: var(--transition);
+    width: 100%;
+  }
+  .novora-input:focus {
+    border-color: var(--accent-dark);
+    box-shadow: 0 0 0 3px rgba(232,180,184,0.2);
+    outline: none;
+    background: white;
+  }
+  .novora-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gray);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+  <div class="row g-4">
+
+    <!-- ══════════════════════════════
+         LEFT COLUMN — Profile Card
+    ══════════════════════════════ -->
+    <div class="col-lg-4">
+
+      <!-- Cover + Avatar -->
+      <div class="profile-card mb-4">
+        <div class="profile-cover">
+          <!-- decorative pattern -->
+          <svg style="position:absolute;bottom:0;left:0;right:0;opacity:0.06;" viewBox="0 0 400 80" preserveAspectRatio="none">
+            <path d="M0,40 C100,80 300,0 400,40 L400,80 L0,80 Z" fill="white"/>
+          </svg>
+        </div>
+        <!-- Avatar -->
+        <div style="position:relative; padding:0 2rem 1.5rem; margin-top:60px;">
+          <div style="position:relative; display:inline-block; margin-bottom:1rem;">
+            <div style="width:100px; height:100px; border-radius:50%; border:4px solid white; box-shadow:var(--shadow-md); background:linear-gradient(135deg,var(--accent),var(--accent-dark)); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:2.5rem; font-weight:700; color:var(--primary); margin-top:-70px;">
+              {{ user.username|first|upper }}
+            </div>
+          </div>
+          <h4 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin:0 0 0.2rem;">
+            {{ user.get_full_name|default:user.username }}
+          </h4>
+          <p style="font-size:0.82rem; color:var(--gray); margin:0 0 1.2rem;">
+            <i class="bi bi-envelope me-1"></i>{{ user.email|default:"No email set" }}
+          </p>
+          <!-- Stats Pills -->
+          <div class="d-flex flex-wrap gap-2">
+            <div class="stat-pill">
+              <span class="stat-pill-num">{{ orders.count }}</span>
+              <span class="stat-pill-label">Orders</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-num">{{ user.wishlist.products.count|default:"0" }}</span>
+              <span class="stat-pill-label">Wishlist</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-num">{{ user.date_joined|date:"Y" }}</span>
+              <span class="stat-pill-label">Since</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="profile-card p-0 mb-4">
+        <div style="padding:1.2rem 1.5rem; border-bottom:1px solid var(--border);">
+          <h6 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin:0; font-size:1rem;">
+            <i class="bi bi-person-lines-fill me-2" style="color:var(--accent-dark);"></i>Personal Info
+          </h6>
+        </div>
+        <div style="padding:0.5rem 1.5rem 1rem;">
+          <div class="info-row">
+            <div class="info-row-icon"><i class="bi bi-person"></i></div>
+            <div>
+              <span class="info-row-label">Full Name</span>
+              <span class="info-row-value">{{ user.get_full_name|default:"Not set" }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-row-icon"><i class="bi bi-envelope"></i></div>
+            <div>
+              <span class="info-row-label">Email</span>
+              <span class="info-row-value">{{ user.email|default:"Not set" }}</span>
+            </div>
+          </div>
+          {% with profile=request.user.profile %}
+          <div class="info-row">
+            <div class="info-row-icon"><i class="bi bi-telephone"></i></div>
+            <div>
+              <span class="info-row-label">Phone</span>
+              <span class="info-row-value">{{ profile.phone|default:"Not set" }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-row-icon"><i class="bi bi-gender-ambiguous"></i></div>
+            <div>
+              <span class="info-row-label">Gender</span>
+              <span class="info-row-value">{{ profile.gender|default:"Not set"|capfirst }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-row-icon"><i class="bi bi-geo-alt"></i></div>
+            <div>
+              <span class="info-row-label">Address</span>
+              <span class="info-row-value">{{ profile.address|default:"Not set"|truncatechars:40 }}</span>
+            </div>
+          </div>
+          {% endwith %}
+          <div class="info-row">
+            <div class="info-row-icon"><i class="bi bi-calendar3"></i></div>
+            <div>
+              <span class="info-row-label">Member Since</span>
+              <span class="info-row-value">{{ user.date_joined|date:"d F Y" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body Measurements Card -->
+      {% with profile=request.user.profile %}
+      <div class="measurement-card mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-1rem" style="margin-bottom:1rem;">
+          <h6 style="font-family:'Playfair Display',serif; color:white; margin:0; font-size:1rem;">
+            <i class="bi bi-rulers me-2" style="color:var(--accent);"></i>Body Measurements
+          </h6>
+          <span style="font-size:0.7rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px;">For AI Stylist</span>
+        </div>
+        {% if profile.height or profile.weight or profile.waist_size or profile.skin_tone %}
+        <div class="row g-2">
+          {% if profile.height %}
+          <div class="col-6">
+            <div class="measurement-item">
+              <span class="measurement-val">{{ profile.height }}</span>
+              <span class="measurement-lbl">Height (cm)</span>
+            </div>
+          </div>
+          {% endif %}
+          {% if profile.weight %}
+          <div class="col-6">
+            <div class="measurement-item">
+              <span class="measurement-val">{{ profile.weight }}</span>
+              <span class="measurement-lbl">Weight (kg)</span>
+            </div>
+          </div>
+          {% endif %}
+          {% if profile.waist_size %}
+          <div class="col-6">
+            <div class="measurement-item">
+              <span class="measurement-val">{{ profile.waist_size }}</span>
+              <span class="measurement-lbl">Waist (cm)</span>
+            </div>
+          </div>
+          {% endif %}
+          {% if profile.skin_tone %}
+          <div class="col-6">
+            <div class="measurement-item">
+              <span class="measurement-val" style="font-size:0.95rem;">{{ profile.skin_tone|capfirst }}</span>
+              <span class="measurement-lbl">Skin Tone</span>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:1rem 0;">
+          <i class="bi bi-rulers" style="font-size:2rem; color:rgba(255,255,255,0.2); display:block; margin-bottom:0.5rem;"></i>
+          <p style="font-size:0.82rem; color:rgba(255,255,255,0.4); margin:0;">No measurements saved yet.</p>
+          <p style="font-size:0.78rem; color:rgba(255,255,255,0.3); margin:0;">Edit your profile to add them.</p>
+        </div>
+        {% endif %}
+      </div>
+      {% endwith %}
+
+      <!-- Quick Links -->
+      <div class="profile-card p-0">
+        <div style="padding:1.2rem 1.5rem; border-bottom:1px solid var(--border);">
+          <h6 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin:0; font-size:1rem;">
+            <i class="bi bi-lightning me-2" style="color:var(--accent-dark);"></i>Quick Links
+          </h6>
+        </div>
+        <div style="padding:0.8rem 1rem;">
+          <a href="{% url 'wishlist' %}" style="display:flex; align-items:center; gap:0.8rem; padding:0.8rem; border-radius:var(--radius); color:var(--primary); text-decoration:none; transition:var(--transition);"
+             onmouseover="this.style.background='var(--light)';" onmouseout="this.style.background='transparent';">
+            <i class="bi bi-heart" style="color:#e74c3c; font-size:1.1rem; width:20px; text-align:center;"></i>
+            <span style="font-size:0.88rem; font-weight:500;">My Wishlist</span>
+            <span style="margin-left:auto; font-size:0.75rem; color:var(--gray);">{{ user.wishlist.products.count|default:"0" }} items</span>
+            <i class="bi bi-chevron-right" style="color:var(--gray); font-size:0.75rem;"></i>
+          </a>
+          <a href="{% url 'cart' %}" style="display:flex; align-items:center; gap:0.8rem; padding:0.8rem; border-radius:var(--radius); color:var(--primary); text-decoration:none; transition:var(--transition);"
+             onmouseover="this.style.background='var(--light)';" onmouseout="this.style.background='transparent';">
+            <i class="bi bi-bag" style="color:var(--accent-dark); font-size:1.1rem; width:20px; text-align:center;"></i>
+            <span style="font-size:0.88rem; font-weight:500;">My Cart</span>
+            <i class="bi bi-chevron-right" style="color:var(--gray); font-size:0.75rem; margin-left:auto;"></i>
+          </a>
+          <a href="{% url 'product_list' %}" style="display:flex; align-items:center; gap:0.8rem; padding:0.8rem; border-radius:var(--radius); color:var(--primary); text-decoration:none; transition:var(--transition);"
+             onmouseover="this.style.background='var(--light)';" onmouseout="this.style.background='transparent';">
+            <i class="bi bi-bag-heart" style="color:#8e44ad; font-size:1.1rem; width:20px; text-align:center;"></i>
+            <span style="font-size:0.88rem; font-weight:500;">Shop Now</span>
+            <i class="bi bi-chevron-right" style="color:var(--gray); font-size:0.75rem; margin-left:auto;"></i>
+          </a>
+          <a href="{% url 'logout' %}" style="display:flex; align-items:center; gap:0.8rem; padding:0.8rem; border-radius:var(--radius); color:#e74c3c; text-decoration:none; transition:var(--transition);"
+             onmouseover="this.style.background='#fff5f5';" onmouseout="this.style.background='transparent';">
+            <i class="bi bi-box-arrow-right" style="font-size:1.1rem; width:20px; text-align:center;"></i>
+            <span style="font-size:0.88rem; font-weight:500;">Sign Out</span>
+            <i class="bi bi-chevron-right" style="font-size:0.75rem; margin-left:auto;"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         RIGHT COLUMN — Tabs
+    ══════════════════════════════ -->
+    <div class="col-lg-8">
+      <div class="profile-card">
+
+        <!-- TAB NAV -->
+        <div class="profile-tab-nav">
+          <button class="profile-tab-btn active" onclick="switchTab('orders', this)">
+            <i class="bi bi-bag-check"></i> My Orders
+          </button>
+          <button class="profile-tab-btn" onclick="switchTab('edit', this)">
+            <i class="bi bi-pencil-square"></i> Edit Profile
+          </button>
+          <button class="profile-tab-btn" onclick="switchTab('measurements', this)">
+            <i class="bi bi-rulers"></i> Measurements
+          </button>
+        </div>
+
+        <!-- ── TAB: ORDERS ── -->
+        <div id="tab-orders" class="profile-tab-content active">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin:0;">
+              Order History
+            </h5>
+            <span style="font-size:0.8rem; color:var(--gray);">{{ orders.count }} total order{{ orders.count|pluralize }}</span>
+          </div>
+
+          {% if orders %}
+            {% for order in orders %}
+            <div class="order-row">
+              <!-- Order Icon -->
+              <div style="width:48px; height:48px; border-radius:var(--radius); background:{% if order.status == 'delivered' %}#d4edda{% elif order.status == 'shipped' %}#d1ecf1{% elif order.status == 'processing' %}#fff3cd{% elif order.status == 'cancelled' %}#f8d7da{% else %}var(--light){% endif %}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <i class="bi bi-{% if order.status == 'delivered' %}check-circle-fill{% elif order.status == 'shipped' %}truck{% elif order.status == 'processing' %}gear-fill{% elif order.status == 'cancelled' %}x-circle-fill{% else %}clock{% endif %}"
+                   style="font-size:1.2rem; color:{% if order.status == 'delivered' %}#28a745{% elif order.status == 'shipped' %}#17a2b8{% elif order.status == 'processing' %}#ffc107{% elif order.status == 'cancelled' %}#dc3545{% else %}var(--gray){% endif %};"></i>
+              </div>
+              <!-- Order Info -->
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <span class="order-num">#{{ order.id }}</span>
+                    <span style="font-size:0.75rem; color:var(--gray); margin-left:0.5rem;">{{ order.created_at|date:"d M Y" }}</span>
+                  </div>
+                  <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                  <div style="font-size:0.8rem; color:var(--gray);">
+                    <i class="bi bi-geo-alt me-1"></i>{{ order.city }}
+                    &nbsp;·&nbsp;
+                    <i class="bi bi-cash-coin me-1"></i>{{ order.get_payment_method_display }}
+                  </div>
+                  <span style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); font-size:1rem;">
+                    PKR {{ order.total_amount }}
+                  </span>
+                </div>
+                <!-- Order Items Preview -->
+                {% if order.items.all %}
+                <div style="margin-top:0.6rem; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                  {% for item in order.items.all|slice:":3" %}
+                  <span style="background:var(--light); border-radius:50px; padding:0.2rem 0.7rem; font-size:0.7rem; color:var(--gray);">
+                    {{ item.product.name|truncatechars:18 }} ×{{ item.quantity }}
+                  </span>
+                  {% endfor %}
+                  {% if order.items.count > 3 %}
+                  <span style="background:var(--light); border-radius:50px; padding:0.2rem 0.7rem; font-size:0.7rem; color:var(--gray);">
+                    +{{ order.items.count|add:"-3" }} more
+                  </span>
+                  {% endif %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+
+          {% else %}
+          <div class="empty-state" style="padding:4rem 0;">
+            <div class="empty-state-icon"><i class="bi bi-bag-x"></i></div>
+            <h4>No Orders Yet</h4>
+            <p>You haven't placed any orders. Start exploring NOVORA!</p>
+            <a href="{% url 'product_list' %}" class="btn-novora-accent mt-3">
+              <i class="bi bi-bag-heart me-2"></i>Shop Now
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- ── TAB: EDIT PROFILE ── -->
+        <div id="tab-edit" class="profile-tab-content">
+          <h5 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin-bottom:1.8rem;">
+            Edit Your Profile
+          </h5>
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+
+              <!-- Phone -->
+              <div class="col-md-6">
+                <label class="novora-label">Phone Number</label>
+                <div style="position:relative;">
+                  <i class="bi bi-telephone" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                  <input type="text" name="phone" class="novora-input" style="padding-left:2.5rem;"
+                    placeholder="+92 300 0000000"
+                    value="{{ form.phone.value|default:'' }}">
+                </div>
+              </div>
+
+              <!-- Gender -->
+              <div class="col-md-6">
+                <label class="novora-label">Gender</label>
+                <select name="gender" class="novora-input">
+                  <option value="">Select gender</option>
+                  <option value="male" {% if form.gender.value == 'male' %}selected{% endif %}>Male</option>
+                  <option value="female" {% if form.gender.value == 'female' %}selected{% endif %}>Female</option>
+                  <option value="other" {% if form.gender.value == 'other' %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+
+              <!-- Address -->
+              <div class="col-12">
+                <label class="novora-label">Home Address</label>
+                <div style="position:relative;">
+                  <i class="bi bi-geo-alt" style="position:absolute; left:12px; top:14px; color:var(--gray);"></i>
+                  <textarea name="address" class="novora-input" rows="3" style="padding-left:2.5rem; resize:none;"
+                    placeholder="Street address, city, province...">{{ form.address.value|default:'' }}</textarea>
+                </div>
+              </div>
+
+              <!-- Profile Picture -->
+              <div class="col-12">
+                <label class="novora-label">Profile Picture</label>
+                <div style="border:2px dashed var(--border); border-radius:var(--radius-lg); padding:1.5rem; text-align:center; background:var(--light); cursor:pointer; transition:var(--transition);"
+                     onmouseover="this.style.borderColor='var(--accent-dark)';"
+                     onmouseout="this.style.borderColor='var(--border)';"
+                     onclick="document.getElementById('profilePicInput').click();">
+                  <i class="bi bi-cloud-arrow-up" style="font-size:2rem; color:var(--accent-dark); display:block; margin-bottom:0.5rem;"></i>
+                  <p style="font-size:0.85rem; color:var(--gray); margin:0;">Click to upload profile picture</p>
+                  <p style="font-size:0.75rem; color:#bbb; margin:0;">JPG, PNG up to 5MB</p>
+                </div>
+                <input type="file" name="profile_picture" id="profilePicInput" accept="image/*" style="display:none;"
+                       onchange="document.getElementById('picFileName').textContent = this.files[0]?.name || '';">
+                <p id="picFileName" style="font-size:0.78rem; color:var(--accent-dark); margin-top:0.4rem;"></p>
+              </div>
+
+            </div>
+
+            <div style="border-top:1px solid var(--border); margin-top:2rem; padding-top:1.5rem; display:flex; gap:1rem;">
+              <button type="submit" class="btn-novora-accent" style="padding:0.8rem 2rem;">
+                <i class="bi bi-check2 me-2"></i>Save Changes
+              </button>
+              <button type="button" class="btn-novora-outline" style="padding:0.8rem 2rem;"
+                      onclick="switchTab('orders', document.querySelector('.profile-tab-btn'))">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ── TAB: MEASUREMENTS ── -->
+        <div id="tab-measurements" class="profile-tab-content">
+          <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+              <h5 style="font-family:'Playfair Display',serif; font-weight:700; color:var(--primary); margin:0 0 0.3rem;">
+                Body Measurements
+              </h5>
+              <p style="font-size:0.82rem; color:var(--gray); margin:0;">
+                Used by our AI Stylist to recommend the perfect clothing for your body type.
+              </p>
+            </div>
+            <div style="background:linear-gradient(135deg,var(--accent),var(--accent-dark)); border-radius:50px; padding:0.3rem 0.9rem; font-size:0.7rem; font-weight:700; color:var(--primary); letter-spacing:1px; text-transform:uppercase;">
+              <i class="bi bi-stars me-1"></i>AI Ready
+            </div>
+          </div>
+
+          <form method="POST">
+            {% csrf_token %}
+            <div class="row g-4">
+
+              <!-- Height -->
+              <div class="col-md-6">
+                <label class="novora-label">Height</label>
+                <div style="position:relative;">
+                  <input type="number" name="height" class="novora-input" style="padding-right:3.5rem;"
+                    placeholder="e.g. 170"
+                    value="{{ form.height.value|default:'' }}"
+                    min="100" max="250" step="0.1">
+                  <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.78rem; color:var(--gray); font-weight:600;">cm</span>
+                </div>
+              </div>
+
+              <!-- Weight -->
+              <div class="col-md-6">
+                <label class="novora-label">Weight</label>
+                <div style="position:relative;">
+                  <input type="number" name="weight" class="novora-input" style="padding-right:3rem;"
+                    placeholder="e.g. 65"
+                    value="{{ form.weight.value|default:'' }}"
+                    min="30" max="300" step="0.1">
+                  <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.78rem; color:var(--gray); font-weight:600;">kg</span>
+                </div>
+              </div>
+
+              <!-- Waist -->
+              <div class="col-md-6">
+                <label class="novora-label">Waist Size</label>
+                <div style="position:relative;">
+                  <input type="number" name="waist_size" class="novora-input" style="padding-right:3.5rem;"
+                    placeholder="e.g. 80"
+                    value="{{ form.waist_size.value|default:'' }}"
+                    min="40" max="200" step="0.1">
+                  <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.78rem; color:var(--gray); font-weight:600;">cm</span>
+                </div>
+              </div>
+
+              <!-- Skin Tone -->
+              <div class="col-md-6">
+                <label class="novora-label">Skin Tone</label>
+                <select name="skin_tone" class="novora-input">
+                  <option value="">Select skin tone</option>
+                  {% with tones="Fair,Light,Medium,Olive,Tan,Brown,Dark" %}
+                  {% for tone in tones.split %}
+                  <option value="{{ tone|lower }}" {% if form.skin_tone.value == tone|lower %}selected{% endif %}>{{ tone }}</option>
+                  {% endfor %}
+                  {% endwith %}
+                </select>
+              </div>
+
+              <!-- Body Type Display -->
+              <div class="col-12">
+                <div style="background:linear-gradient(135deg,var(--primary),#0f3460); border-radius:var(--radius-lg); padding:1.5rem; color:white;">
+                  <div class="d-flex align-items-center gap-3 mb-1rem" style="margin-bottom:1rem;">
+                    <i class="bi bi-stars" style="font-size:1.5rem; color:var(--accent);"></i>
+                    <div>
+                      <h6 style="margin:0; font-family:'Playfair Display',serif; color:white;">How it works</h6>
+                      <p style="margin:0; font-size:0.78rem; color:rgba(255,255,255,0.5);">Our AI Stylist uses these measurements</p>
+                    </div>
+                  </div>
+                  <div class="row g-2 text-center">
+                    <div class="col-3">
+                      <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius); padding:0.7rem;">
+                        <i class="bi bi-rulers" style="color:var(--accent); display:block; font-size:1.2rem; margin-bottom:0.3rem;"></i>
+                        <span style="font-size:0.65rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px;">Measure</span>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius); padding:0.7rem;">
+                        <i class="bi bi-cpu" style="color:var(--accent); display:block; font-size:1.2rem; margin-bottom:0.3rem;"></i>
+                        <span style="font-size:0.65rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px;">Analyse</span>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius); padding:0.7rem;">
+                        <i class="bi bi-person-check" style="color:var(--accent); display:block; font-size:1.2rem; margin-bottom:0.3rem;"></i>
+                        <span style="font-size:0.65rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px;">Body Type</span>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div style="background:rgba(255,255,255,0.08); border-radius:var(--radius); padding:0.7rem;">
+                        <i class="bi bi-bag-heart" style="color:var(--accent); display:block; font-size:1.2rem; margin-bottom:0.3rem;"></i>
+                        <span style="font-size:0.65rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px;">Recommend</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div style="border-top:1px solid var(--border); margin-top:2rem; padding-top:1.5rem; display:flex; gap:1rem;">
+              <button type="submit" class="btn-novora-accent" style="padding:0.8rem 2rem;">
+                <i class="bi bi-check2 me-2"></i>Save Measurements
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function switchTab(tabId, clickedBtn) {
+    // hide all tabs
+    document.querySelectorAll('.profile-tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+    // show clicked
+    document.getElementById('tab-' + tabId).classList.add('active');
+    clickedBtn.classList.add('active');
+  }
+</script>
+{% endblock %}

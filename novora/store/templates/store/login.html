@@ -1,0 +1,71 @@
+{% extends 'store/base.html' %}
+{% block title %}Login — NOVORA{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="auth-card">
+
+          <!-- LOGO -->
+          <div class="text-center mb-4">
+            <a href="{% url 'home' %}" style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--primary); letter-spacing:4px; text-decoration:none;">
+              NOV<span style="color:var(--accent-dark);">O</span>RA
+            </a>
+          </div>
+
+          <h2 class="auth-title">Welcome Back</h2>
+          <p class="auth-subtitle">Sign in to your NOVORA account</p>
+
+          <form method="POST" action="{% url 'login' %}" class="novora-form">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <div style="position:relative;">
+                <i class="bi bi-person" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                <input
+                  type="text"
+                  name="username"
+                  class="form-control"
+                  style="padding-left:2.5rem;"
+                  placeholder="Enter your username"
+                  value="{{ request.POST.username }}"
+                  autocomplete="username"
+                  required>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Password</label>
+              <div style="position:relative;">
+                <i class="bi bi-lock" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray);"></i>
+                <input
+                  type="password"
+                  name="password"
+                  class="form-control"
+                  style="padding-left:2.5rem;"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-novora-accent w-100 justify-content-center" style="display:flex; padding:0.85rem;">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+          </form>
+
+          <div class="auth-divider">or</div>
+
+          <p class="text-center" style="font-size:0.88rem; color:var(--gray); margin:0;">
+            Don't have an account?
+            <a href="{% url 'register' %}" style="color:var(--accent-dark); font-weight:600;">Create one free</a>
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
